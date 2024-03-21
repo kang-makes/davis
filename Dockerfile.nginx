@@ -1,0 +1,7 @@
+ARG BASE_IMAGE
+
+FROM ${BASE_IMAGE}
+
+RUN apk --no-progress --update add --no-cache \
+    supervisor \
+    nginx

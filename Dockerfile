@@ -47,26 +47,39 @@ RUN apk --update --no-cache add \
     openssl-dev \
     krb5-dev
 
-# Leaving a Docker layer per extension so in case it fails I have it cached to develop faster. 
+# Leaving a Docker layer per extension so in case it fails I have it cached to develop faster.
+# But we are also cleaning each layer so it does not grow to the point we get out of cache space.
 
 # Intl support
-RUN docker-php-ext-install intl
+RUN docker-php-ext-install -j$(nproc) intl && \
+    docker-php-source delete && \
+    rm -rf /tmp/*
 # PDO: MySQL
 RUN docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd && \
-    docker-php-ext-install pdo_mysql
+    docker-php-ext-install -j$(nproc) pdo_mysql && \
+    docker-php-source delete && \
+    rm -rf /tmp/*
 # PDO: PostgreSQL
 RUN docker-php-ext-configure pgsql --with-pgsql=/usr/local/pgsql && \
-    docker-php-ext-install pgsql pdo_pgsql
+    docker-php-ext-install -j$(nproc) pgsql pdo_pgsql && \
+    docker-php-source delete && \
+    rm -rf /tmp/*
 # GD (map image in mail)
 RUN docker-php-ext-configure gd --with-freetype && \
-    docker-php-ext-install gd && \
-    docker-php-ext-enable gd
+    docker-php-ext-install -j$(nproc) gd && \
+    docker-php-ext-enable gd && \
+    docker-php-source delete && \
+    rm -rf /tmp/*
 # LDAP auth support
 RUN docker-php-ext-configure ldap && \
-    docker-php-ext-install ldap
+    docker-php-ext-install -j$(nproc) ldap && \
+    docker-php-source delete && \
+    rm -rf /tmp/*
 # IMAP auth support
 RUN docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
-    docker-php-ext-install imap
+    docker-php-ext-install -j$(nproc) imap && \
+    docker-php-source delete && \
+    rm -rf /tmp/*
 
 
 ###################################################
